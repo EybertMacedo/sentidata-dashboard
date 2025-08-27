@@ -100,12 +100,15 @@ export function DashboardSidebar({ filters, onFilterChange }: DashboardSidebarPr
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
+                       <CalendarComponent
                         initialFocus
                         mode="range"
                         defaultMonth={filters.dateRange.from}
-                        selected={filters.dateRange}
-                        onSelect={(range) => onFilterChange("dateRange", range)}
+                        selected={{
+                          from: filters.dateRange.from,
+                          to: filters.dateRange.to
+                        }}
+                        onSelect={(range) => onFilterChange("dateRange", range || { from: undefined, to: undefined })}
                         numberOfMonths={2}
                         className="pointer-events-auto"
                       />
