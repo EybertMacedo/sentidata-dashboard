@@ -11,10 +11,10 @@ export function KPICards({ data, loading }: KPICardsProps) {
   // Verificar si data existe antes de desestructurar
   if (!data) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 h-full">
-        <div className="col-span-full flex items-center justify-center py-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-0.5 sm:gap-1 h-full min-h-0">
+        <div className="col-span-full flex items-center justify-center py-1">
           <div className="text-center text-muted-foreground">
-            <p className="text-sm">No hay datos disponibles</p>
+            <p className="text-xs">No hay datos disponibles</p>
             <p className="text-xs">Esperando carga de datos...</p>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function KPICards({ data, loading }: KPICardsProps) {
     : 'Sin comentarios negativos';
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 h-full">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-0.5 sm:gap-1 h-full min-h-0">
       {/* Indicador de loading sutil */}
       {loading && !data && (
         <div className="col-span-full flex items-center justify-center py-8">
@@ -68,29 +68,29 @@ export function KPICards({ data, loading }: KPICardsProps) {
       )}
       {/* Engagement Total - Posts, Comentarios y Likes */}
       <Card className="kpi-card h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="flex items-center justify-between px-4 md:px-4 pt-3 md:pt-3 pb-2 md:pb-2">
-          <CardTitle className="text-xs md:text-sm font-semibold text-foreground">
+        <div className="flex items-center justify-between px-0.5 pt-0.5 pb-0">
+          <CardTitle className="text-xs font-semibold text-foreground">
             Engagement Total
           </CardTitle>
           <div className="flex gap-1">
-            <FileText className="h-3 w-3 md:h-4 md:w-4 text-primary flex-shrink-0" />
-            <MessageSquare className="h-3 w-3 md:h-4 md:w-4 text-primary flex-shrink-0" />
-            <Heart className="h-3 w-3 md:h-4 md:w-4 text-success flex-shrink-0" />
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+            <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-success flex-shrink-0" />
           </div>
         </div>
-        <CardContent className="flex-1 flex flex-col justify-center pb-3 px-4">
-          <div className="space-y-2">
+        <CardContent className="flex-1 flex flex-col justify-center pb-0.5 px-0.5">
+          <div className="space-y-0">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Posts:</span>
-              <span className="text-sm md:text-lg font-bold text-foreground">{totalPosts.toLocaleString()}</span>
+              <span className="text-xs font-bold text-foreground">{totalPosts.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Comentarios:</span>
-              <span className="text-sm md:text-lg font-bold text-foreground">{totalComments.toLocaleString()}</span>
+              <span className="text-xs font-bold text-foreground">{totalComments.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Likes:</span>
-              <span className="text-sm md:text-lg font-bold text-foreground">{totalLikes.toLocaleString()}</span>
+              <span className="text-xs font-bold text-foreground">{totalLikes.toLocaleString()}</span>
             </div>
           </div>
         </CardContent>
@@ -98,15 +98,15 @@ export function KPICards({ data, loading }: KPICardsProps) {
 
       {/* Comentarios Positivos */}
       <Card className="kpi-card h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="flex items-center justify-between px-4 md:px-4 pt-3 md:pt-3 pb-2 md:pb-2">
-          <CardTitle className="text-xs md:text-sm font-semibold text-foreground">
+        <div className="flex items-center justify-between px-0.5 pt-0.5 pb-0">
+          <CardTitle className="text-xs font-semibold text-foreground">
             Comentarios Positivos
           </CardTitle>
-          <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0"></div>
+          <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
         </div>
-        <CardContent className="flex-1 flex flex-col justify-center pb-3 px-4">
-          <div className="text-sm md:text-lg font-bold text-foreground text-green-600">{sentimentDistribution.positive.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+        <CardContent className="flex-1 flex flex-col justify-center pb-0.5 px-0.5">
+          <div className="text-xs font-bold text-foreground text-green-600">{sentimentDistribution.positive.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-0 line-clamp-1">
             {positiveMessage}
           </p>
         </CardContent>
@@ -114,15 +114,15 @@ export function KPICards({ data, loading }: KPICardsProps) {
 
       {/* Comentarios Neutrales */}
       <Card className="kpi-card h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="flex items-center justify-between px-4 md:px-4 pt-3 md:pt-3 pb-2 md:pb-2">
-          <CardTitle className="text-xs md:text-sm font-semibold text-foreground">
+        <div className="flex items-center justify-between px-0.5 pt-0.5 pb-0">
+          <CardTitle className="text-xs font-semibold text-foreground">
             Comentarios Neutrales
           </CardTitle>
-          <div className="w-3 h-3 rounded-full bg-yellow-500 flex-shrink-0"></div>
+          <div className="w-2 h-2 rounded-full bg-yellow-500 flex-shrink-0"></div>
         </div>
-        <CardContent className="flex-1 flex flex-col justify-center pb-3 px-4">
-          <div className="text-sm md:text-lg font-bold text-foreground text-yellow-600">{sentimentDistribution.neutral.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+        <CardContent className="flex-1 flex flex-col justify-center pb-0.5 px-0.5">
+          <div className="text-xs font-bold text-foreground text-yellow-600">{sentimentDistribution.neutral.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-0 line-clamp-1">
             {neutralMessage}
           </p>
         </CardContent>
@@ -130,15 +130,15 @@ export function KPICards({ data, loading }: KPICardsProps) {
 
       {/* Comentarios Negativos */}
       <Card className="kpi-card h-full flex flex-col shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="flex items-center justify-between px-4 md:px-4 pt-3 md:pt-3 pb-2 md:pb-2">
-          <CardTitle className="text-xs md:text-sm font-semibold text-foreground">
+        <div className="flex items-center justify-between px-0.5 pt-0.5 pb-0">
+          <CardTitle className="text-xs font-semibold text-foreground">
             Comentarios Negativos
           </CardTitle>
-          <div className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0"></div>
+          <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></div>
         </div>
-        <CardContent className="flex-1 flex flex-col justify-center pb-3 px-4">
-          <div className="text-sm md:text-lg font-bold text-foreground text-red-600">{sentimentDistribution.negative.toLocaleString()}</div>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+        <CardContent className="flex-1 flex flex-col justify-center pb-0.5 px-0.5">
+          <div className="text-xs font-bold text-foreground text-red-600">{sentimentDistribution.negative.toLocaleString()}</div>
+          <p className="text-xs text-muted-foreground mt-0 line-clamp-1">
             {negativeMessage}
           </p>
         </CardContent>

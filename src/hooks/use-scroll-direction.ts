@@ -16,20 +16,17 @@ export function useScrollDirection() {
         clearTimeout(timeoutRef.current);
       }
       
-      if (currentScrollY > prevScrollY && currentScrollY > 20) {
-        setScrollDirection('down');
-        setIsVisible(false);
-      } else if (currentScrollY < prevScrollY) {
-        setScrollDirection('up');
+      // Only show header when at the very top of the page
+      if (currentScrollY <= 10) {
         setIsVisible(true);
+        setScrollDirection(null);
+      } else {
+        // Hide header when scrolled down from the top
+        setIsVisible(false);
+        setScrollDirection('down');
       }
       
       setPrevScrollY(currentScrollY);
-      
-      // Auto-show header after 1.5 seconds of no scrolling
-      timeoutRef.current = setTimeout(() => {
-        setIsVisible(true);
-      }, 1500);
     };
 
     // Also listen for scroll events on the dashboard container

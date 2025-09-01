@@ -82,9 +82,9 @@ export function useDashboardDataSimple(filters: DashboardFilters) {
 
         console.log(`📊 Comentarios obtenidos: ${comments?.length || 0}`);
 
-        // Si no hay datos, crear datos de ejemplo
+        // Si no hay datos, mostrar datos vacíos
         if ((!posts || posts.length === 0) && (!comments || comments.length === 0)) {
-          console.log('⚠️ No hay datos en la base de datos, usando datos de ejemplo');
+          console.log('⚠️ No hay datos en la base de datos');
           
           setData({
             posts: [],

@@ -6,7 +6,7 @@ import { ChartsGrid } from "@/components/dashboard/ChartsGrid";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DebugPanel } from "@/components/dashboard/DebugPanel";
 import { useDashboardData, type DashboardFilters } from "@/hooks/use-dashboard-data";
-import { useScrollDirection } from "@/hooks/use-scroll-direction";
+
 
 const Dashboard = () => {
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -18,7 +18,6 @@ const Dashboard = () => {
   });
 
   const { data, loading, error, isInitialLoad } = useDashboardData(filters);
-  const { scrollDirection, isVisible } = useScrollDirection();
 
   const updateFilter = (key: keyof DashboardFilters, value: any) => {
     setFilters(prev => ({
@@ -67,12 +66,10 @@ const Dashboard = () => {
           </SidebarContent>
         </Sidebar>
         
-        <SidebarInset className="overflow-hidden relative bg-background">
+        <SidebarInset className="h-screen flex flex-col bg-background">
           <DashboardHeader />
           
-          <div className={`p-3 transition-all duration-500 ease-in-out h-screen ${
-            !isVisible ? 'pt-3' : 'pt-20'
-          } overflow-y-auto bg-background relative`} data-dashboard-container>
+          <div className="flex-1 p-0.5 sm:p-1 overflow-hidden bg-background relative">
             {/* Indicador de loading overlay que cubre todo el contenido */}
             {loading && !isInitialLoad && (
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
@@ -82,18 +79,18 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-            <div className="h-full flex flex-col">
-              {/* KPI Cards - Responsive height */}
-              <div className="h-[30%] lg:h-[25%] min-h-0 mb-3">
+              <div className="h-full flex flex-col gap-0.5 sm:gap-1">
+              {/* KPI Cards - Hidden on small viewports, compact on larger screens */}
+              <div className="hidden sm:block h-[120px] md:h-[100px] lg:h-[120px] flex-shrink-0">
                 <KPICards data={data} loading={loading} />
               </div>
               
-              {/* Charts Grid - Responsive height */}
-              <div className="h-[70%] lg:h-[75%] min-h-0">
+              {/* Charts Grid - Full height on small screens, remaining space on larger screens */}
+              <div className="flex-1 min-h-0">
                 <ChartsGrid data={data} loading={loading} />
               </div>
+              </div>
             </div>
-          </div>
         </SidebarInset>
         
         {/* Debug Panel */}

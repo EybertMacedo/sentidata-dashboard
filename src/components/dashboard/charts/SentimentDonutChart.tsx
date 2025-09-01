@@ -5,12 +5,8 @@ interface SentimentDonutChartProps {
   data: DashboardData;
 }
 
-// Mock data para cuando no hay datos reales
-const mockSentimentData = [
-  { name: "Positivo", value: 67.3, count: 839, color: "hsl(var(--success))" },
-  { name: "Negativo", value: 18.2, count: 227, color: "hsl(var(--destructive))" },
-  { name: "Neutral", value: 14.5, count: 181, color: "#ca8a04" },
-];
+// Mock data desactivado - solo se muestran datos reales
+const mockSentimentData: any[] = [];
 
 export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
   // Debug completo de los datos recibidos
@@ -36,44 +32,37 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
     );
   }
 
-  // Usar datos reales si están disponibles, sino usar mock data
-  let chartData;
+  // Usar solo datos reales
+  const { sentimentDistribution } = data;
+  const totalSentimentComments = sentimentDistribution.positive + sentimentDistribution.negative + sentimentDistribution.neutral;
   
-  if (data?.sentimentDistribution) {
-    const { sentimentDistribution } = data;
-    const totalSentimentComments = sentimentDistribution.positive + sentimentDistribution.negative + sentimentDistribution.neutral;
-    
-    console.log('=== USANDO DATOS REALES ===');
-    console.log('Positive:', sentimentDistribution.positive);
-    console.log('Negative:', sentimentDistribution.negative);
-    console.log('Neutral:', sentimentDistribution.neutral);
-    console.log('Total:', totalSentimentComments);
-    console.log('==========================');
-    
-    chartData = [
-      { 
-        name: "Positivo", 
-        value: totalSentimentComments > 0 ? (sentimentDistribution.positive / totalSentimentComments) * 100 : 0, 
-        count: sentimentDistribution.positive, 
-        color: "hsl(var(--success))" 
-      },
-      { 
-        name: "Negativo", 
-        value: totalSentimentComments > 0 ? (sentimentDistribution.negative / totalSentimentComments) * 100 : 0, 
-        count: sentimentDistribution.negative, 
-        color: "hsl(var(--destructive))" 
-      },
-      { 
-        name: "Neutral", 
-        value: totalSentimentComments > 0 ? (sentimentDistribution.neutral / totalSentimentComments) * 100 : 0, 
-        count: sentimentDistribution.neutral, 
-        color: "#ca8a04" 
-      },
-    ];
-  } else {
-    console.log('=== USANDO MOCK DATA ===');
-    chartData = mockSentimentData;
-  }
+  console.log('=== USANDO DATOS REALES ===');
+  console.log('Positive:', sentimentDistribution.positive);
+  console.log('Negative:', sentimentDistribution.negative);
+  console.log('Neutral:', sentimentDistribution.neutral);
+  console.log('Total:', totalSentimentComments);
+  console.log('==========================');
+  
+  const chartData = [
+    { 
+      name: "Positivo", 
+      value: totalSentimentComments > 0 ? (sentimentDistribution.positive / totalSentimentComments) * 100 : 0, 
+      count: sentimentDistribution.positive, 
+      color: "hsl(var(--success))" 
+    },
+    { 
+      name: "Negativo", 
+      value: totalSentimentComments > 0 ? (sentimentDistribution.negative / totalSentimentComments) * 100 : 0, 
+      count: sentimentDistribution.negative, 
+      color: "hsl(var(--destructive))" 
+    },
+    { 
+      name: "Neutral", 
+      value: totalSentimentComments > 0 ? (sentimentDistribution.neutral / totalSentimentComments) * 100 : 0, 
+      count: sentimentDistribution.neutral, 
+      color: "#ca8a04" 
+    },
+  ];
 
   const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, percent }: any) => {
     const RADIAN = Math.PI / 180;
@@ -101,7 +90,7 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-white">
+    <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -110,10 +99,11 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
             cy="50%"
             labelLine={false}
             label={renderCustomLabel}
-            outerRadius={80}
+            outerRadius="70%"
+            innerRadius="30%"
             fill="#8884d8"
             dataKey="value"
-            paddingAngle={2} // Agregar pequeño espacio entre segmentos
+            paddingAngle={2}
           >
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -133,8 +123,8 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
           />
           <Legend 
             verticalAlign="bottom" 
-            height={36}
-            wrapperStyle={{ fontSize: '12px' }}
+            height={30}
+            wrapperStyle={{ fontSize: '10px' }}
           />
         </PieChart>
       </ResponsiveContainer>

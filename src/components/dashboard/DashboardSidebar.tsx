@@ -69,14 +69,15 @@ export function DashboardSidebar({ filters, onFilterChange }: DashboardSidebarPr
           </div>
         </div>
 
-        {/* Filtros de Análisis */}
-        <div className="flex-shrink-0">
-          <h3 className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground mb-3">
-            <Filter className="h-3 w-3" />
-            Filtros de Análisis
-          </h3>
-          
-          <div className="space-y-3">
+        {/* Filtros de Análisis - Con scroll */}
+        <div className="flex-1 min-h-0 overflow-y-auto sidebar-scroll">
+          <div>
+            <h3 className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground mb-3">
+              <Filter className="h-3 w-3" />
+              Filtros de Análisis
+            </h3>
+            
+            <div className="space-y-3">
             {/* Filtro de Fecha */}
             <div className="filter-section">
               <label className="text-xs font-medium text-foreground mb-1 block">
@@ -186,11 +187,12 @@ export function DashboardSidebar({ filters, onFilterChange }: DashboardSidebarPr
                 </SelectContent>
               </Select>
             </div>
+            </div>
           </div>
         </div>
 
-        {/* Información del Dashboard */}
-        <div className="flex-1 flex flex-col justify-end">
+        {/* Información del Dashboard - Siempre visible */}
+        <div className="flex-shrink-0 mt-4">
           <div className="bg-sidebar-accent rounded-lg p-3 border border-sidebar-border">
             <h4 className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground mb-2">
               <BarChart3 className="h-3 w-3" />

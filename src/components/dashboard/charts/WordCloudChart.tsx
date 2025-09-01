@@ -12,92 +12,8 @@ interface WordData {
   sentiment: string;
 }
 
-// Datos de ejemplo optimizados para evitar superposiciones
-const fallbackWords: WordData[] = [
-  // Palabras principales de alto valor
-  { text: "mejoras", value: 85, sentiment: "positive" },
-  { text: "transporte", value: 78, sentiment: "neutral" },
-  { text: "excelente", value: 75, sentiment: "positive" },
-  { text: "problema", value: 72, sentiment: "negative" },
-  { text: "calidad", value: 70, sentiment: "positive" },
-  { text: "servicio", value: 68, sentiment: "neutral" },
-  { text: "ciudadanos", value: 66, sentiment: "neutral" },
-  { text: "deficiente", value: 64, sentiment: "negative" },
-  { text: "obras", value: 63, sentiment: "neutral" },
-  { text: "satisfecho", value: 62, sentiment: "positive" },
-  
-  // Palabras de valor medio-alto
-  { text: "rápido", value: 60, sentiment: "positive" },
-  { text: "demora", value: 59, sentiment: "negative" },
-  { text: "eficiente", value: 58, sentiment: "positive" },
-  { text: "municipal", value: 57, sentiment: "neutral" },
-  { text: "necesario", value: 56, sentiment: "neutral" },
-  { text: "lento", value: 55, sentiment: "negative" },
-  { text: "importante", value: 54, sentiment: "positive" },
-  { text: "comunidad", value: 53, sentiment: "positive" },
-  { text: "esperanza", value: 52, sentiment: "positive" },
-  { text: "gestión", value: 51, sentiment: "neutral" },
-  
-  // Palabras de valor medio
-  { text: "seguridad", value: 50, sentiment: "positive" },
-  { text: "limpieza", value: 49, sentiment: "neutral" },
-  { text: "cultura", value: 48, sentiment: "positive" },
-  { text: "deporte", value: 47, sentiment: "neutral" },
-  { text: "educación", value: 46, sentiment: "positive" },
-  { text: "salud", value: 45, sentiment: "neutral" },
-  { text: "medioambiente", value: 44, sentiment: "positive" },
-  { text: "tecnología", value: 43, sentiment: "neutral" },
-  { text: "innovación", value: 42, sentiment: "positive" },
-  { text: "infraestructura", value: 41, sentiment: "neutral" },
-  
-  // Palabras de desarrollo urbano
-  { text: "desarrollo", value: 40, sentiment: "positive" },
-  { text: "sostenible", value: 39, sentiment: "positive" },
-  { text: "participación", value: 38, sentiment: "positive" },
-  { text: "transparencia", value: 37, sentiment: "positive" },
-  { text: "eficacia", value: 36, sentiment: "positive" },
-  { text: "responsabilidad", value: 35, sentiment: "neutral" },
-  { text: "colaboración", value: 34, sentiment: "positive" },
-  { text: "inclusión", value: 33, sentiment: "positive" },
-  { text: "diversidad", value: 32, sentiment: "positive" },
-  { text: "creatividad", value: 31, sentiment: "positive" },
-  
-  // Palabras de valores y actitudes
-  { text: "resiliencia", value: 30, sentiment: "positive" },
-  { text: "adaptabilidad", value: 29, sentiment: "neutral" },
-  { text: "flexibilidad", value: 28, sentiment: "positive" },
-  { text: "confianza", value: 27, sentiment: "positive" },
-  { text: "honestidad", value: 26, sentiment: "positive" },
-  { text: "compromiso", value: 25, sentiment: "positive" },
-  { text: "dedicación", value: 24, sentiment: "positive" },
-  { text: "esfuerzo", value: 23, sentiment: "positive" },
-  { text: "constancia", value: 22, sentiment: "positive" },
-  { text: "perseverancia", value: 21, sentiment: "positive" },
-  
-  // Palabras de servicios y atención
-  { text: "atención", value: 20, sentiment: "neutral" },
-  { text: "cuidado", value: 19, sentiment: "positive" },
-  { text: "mantenimiento", value: 18, sentiment: "neutral" },
-  { text: "renovación", value: 17, sentiment: "positive" },
-  { text: "modernización", value: 16, sentiment: "positive" },
-  { text: "actualización", value: 15, sentiment: "neutral" },
-  { text: "mejora", value: 14, sentiment: "positive" },
-  { text: "optimización", value: 13, sentiment: "positive" },
-  { text: "simplificación", value: 12, sentiment: "positive" },
-  { text: "organización", value: 11, sentiment: "neutral" },
-  
-  // Palabras de planificación
-  { text: "planificación", value: 10, sentiment: "neutral" },
-  { text: "coordinación", value: 9, sentiment: "neutral" },
-  { text: "integración", value: 8, sentiment: "positive" },
-  { text: "sincronización", value: 7, sentiment: "neutral" },
-  { text: "armonización", value: 6, sentiment: "positive" },
-  { text: "equilibrio", value: 5, sentiment: "positive" },
-  { text: "estabilidad", value: 4, sentiment: "positive" },
-  { text: "consistencia", value: 3, sentiment: "positive" },
-  { text: "regularidad", value: 2, sentiment: "neutral" },
-  { text: "continuidad", value: 1, sentiment: "positive" },
-];
+// Datos de ejemplo desactivados - solo se muestran datos reales
+const fallbackWords: WordData[] = [];
 
 // Lista de palabras comunes en español que deben ser ignoradas
 const palabrasIgnorar = new Set([
@@ -326,14 +242,14 @@ export function WordCloudChart({ data }: WordCloudChartProps) {
     <div className="w-full h-full flex items-center justify-center">
       <Wordcloud
         words={words}
-        width={300}
-        height={250}
-        fontSize={(d) => Math.max(d.value * 0.6, 10)} // Reducir multiplicador para evitar superposición
+        width={280}
+        height={200}
+        fontSize={(d) => Math.max(d.value * 0.4, 8)} // Reducir más el multiplicador
         font="Inter, system-ui, sans-serif"
-        padding={3} // Aumentar padding para separar palabras
+        padding={2} // Reducir padding para mejor ajuste
         rotate={0}
-        random={() => 0.5} // Para posicionamiento más estable
-        spiral="archimedean" // Usar espiral de Arquímedes para mejor distribución
+        random={() => 0.5}
+        spiral="archimedean"
       >
         {(cloudWords) =>
           cloudWords.map((w, i) => {

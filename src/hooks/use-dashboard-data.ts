@@ -307,17 +307,27 @@ function generateTimeSeriesData(posts: Post[], comments: Comment[], dateMode: 'a
             return commentDate.getFullYear() === year && commentDate.getMonth() === month;
           });
 
-          const positiveComments = Math.max(0, monthComments.filter(comment => 
+          const positiveComments = Math.max(0, Math.min(1000000, monthComments.filter(comment => 
             comment.c_clasificacion === 'Positiva'
-          ).length);
+          ).length));
 
-          const negativeComments = Math.max(0, monthComments.filter(comment => 
+          const negativeComments = Math.max(0, Math.min(1000000, monthComments.filter(comment => 
             comment.c_clasificacion === 'Negativa'
-          ).length);
+          ).length));
 
-          const neutralComments = Math.max(0, monthComments.filter(comment => 
+          const neutralComments = Math.max(0, Math.min(1000000, monthComments.filter(comment => 
             comment.c_clasificacion === 'Neutral'
-          ).length);
+          ).length));
+          
+          // Debug: mostrar valores problemáticos
+          if (positiveComments > 100000 || negativeComments > 100000 || neutralComments > 100000) {
+            console.warn(`⚠️ Valores altos en series temporales (año ${year}, mes ${month}):`, {
+              positive: positiveComments,
+              negative: negativeComments,
+              neutral: neutralComments,
+              totalComments: monthComments.length
+            });
+          }
 
           // Solo incluir meses con datos
           if (positiveComments > 0 || negativeComments > 0 || neutralComments > 0) {
@@ -352,17 +362,27 @@ function generateTimeSeriesData(posts: Post[], comments: Comment[], dateMode: 'a
         comment.c_time.startsWith(dateStr)
       );
 
-      const positiveComments = Math.max(0, dayComments.filter(comment => 
+      const positiveComments = Math.max(0, Math.min(1000000, dayComments.filter(comment => 
         comment.c_clasificacion === 'Positiva'
-      ).length);
+      ).length));
 
-      const negativeComments = Math.max(0, dayComments.filter(comment => 
+      const negativeComments = Math.max(0, Math.min(1000000, dayComments.filter(comment => 
         comment.c_clasificacion === 'Negativa'
-      ).length);
+      ).length));
 
-      const neutralComments = Math.max(0, dayComments.filter(comment => 
+      const neutralComments = Math.max(0, Math.min(1000000, dayComments.filter(comment => 
         comment.c_clasificacion === 'Neutral'
-      ).length);
+      ).length));
+      
+      // Debug: mostrar valores problemáticos
+      if (positiveComments > 100000 || negativeComments > 100000 || neutralComments > 100000) {
+        console.warn(`⚠️ Valores altos en series temporales (día ${dateStr}):`, {
+          positive: positiveComments,
+          negative: negativeComments,
+          neutral: neutralComments,
+          totalComments: dayComments.length
+        });
+      }
 
       data.push({
         date: `${currentDate.getDate()}/${currentDate.getMonth() + 1}`,
@@ -373,5 +393,21 @@ function generateTimeSeriesData(posts: Post[], comments: Comment[], dateMode: 'a
     }
   }
 
-  return data;
+  // Validación final de los datos generados
+  const validatedData = data.map(item => ({
+    ...item,
+    positive: Math.max(0, Math.min(Number(item.positive) || 0, 1000000)),
+    negative: Math.max(0, Math.min(Number(item.negative) || 0, 1000000)),
+    neutral: Math.max(0, Math.min(Number(item.neutral) || 0, 1000000)),
+  }));
+  
+  // Debug: mostrar resumen de datos generados
+  const maxValue = Math.max(...validatedData.flatMap(d => [d.positive, d.negative, d.neutral]));
+  console.log('=== TIME SERIES DATA GENERATED ===');
+  console.log('Total periods:', validatedData.length);
+  console.log('Max value in data:', maxValue);
+  console.log('Sample data:', validatedData.slice(0, 3));
+  console.log('===================================');
+  
+  return validatedData;
 }
