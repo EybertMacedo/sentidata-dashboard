@@ -19,4 +19,23 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          supabase: ['@supabase/supabase-js'],
+          charts: ['recharts', '@visx/wordcloud'],
+          ui: ['@radix-ui/react-select', '@radix-ui/react-dropdown-menu', '@radix-ui/react-avatar']
+        }
+      }
+    }
+  },
+  preview: {
+    port: 4173,
+    host: true
+  }
 }));

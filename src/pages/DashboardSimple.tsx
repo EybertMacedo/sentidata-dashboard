@@ -5,10 +5,10 @@ import { KPICards } from "@/components/dashboard/KPICards";
 import { ChartsGrid } from "@/components/dashboard/ChartsGrid";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DebugPanel } from "@/components/dashboard/DebugPanel";
-import { useDashboardData, type DashboardFilters } from "@/hooks/use-dashboard-data";
+import { useDashboardDataSimple, type DashboardFilters } from "@/hooks/use-dashboard-data-simple";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
-const Dashboard = () => {
+const DashboardSimple = () => {
   const [filters, setFilters] = useState<DashboardFilters>({
     dateMode: 'annual',
     year: new Date().getFullYear(),
@@ -17,7 +17,7 @@ const Dashboard = () => {
     sentiment: "all",
   });
 
-  const { data, loading, error, isInitialLoad } = useDashboardData(filters);
+  const { data, loading, error } = useDashboardDataSimple(filters);
   const { scrollDirection, isVisible } = useScrollDirection();
 
   const updateFilter = (key: keyof DashboardFilters, value: any) => {
@@ -28,12 +28,12 @@ const Dashboard = () => {
   };
 
   // Solo mostrar loading completo en la carga inicial
-  if (loading && isInitialLoad) {
+  if (loading && !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-lg text-muted-foreground">Cargando datos del dashboard...</p>
+          <p className="text-lg text-muted-foreground">Cargando datos del dashboard (versión simple)...</p>
         </div>
       </div>
     );
@@ -72,16 +72,7 @@ const Dashboard = () => {
           
           <div className={`p-3 transition-all duration-500 ease-in-out h-screen ${
             !isVisible ? 'pt-3' : 'pt-20'
-          } overflow-y-auto bg-background relative`} data-dashboard-container>
-            {/* Indicador de loading overlay que cubre todo el contenido */}
-            {loading && !isInitialLoad && (
-              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                <div className="flex items-center gap-2 text-muted-foreground bg-card/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  <span className="text-sm font-medium">Actualizando gráficos...</span>
-                </div>
-              </div>
-            )}
+          } overflow-y-auto bg-background`} data-dashboard-container>
             <div className="h-full flex flex-col">
               {/* KPI Cards - Responsive height */}
               <div className="h-[30%] lg:h-[25%] min-h-0 mb-3">
@@ -103,4 +94,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardSimple;

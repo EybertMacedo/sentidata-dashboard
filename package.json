@@ -1,14 +1,18 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "sentidata-dashboard",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "SentiData - Dashboard de Percepción Ciudadana para el sector saneamiento",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -41,6 +45,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@supabase/supabase-js": "^2.56.0",
     "@tanstack/react-query": "^5.83.0",
+    "@visx/wordcloud": "^3.12.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

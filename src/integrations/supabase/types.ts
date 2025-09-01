@@ -57,6 +57,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          p_category: string | null
           p_comments: number
           p_id: string
           p_likes: number
@@ -67,6 +68,7 @@ export type Database = {
           p_url: string | null
         }
         Insert: {
+          p_category?: string | null
           p_comments: number
           p_id: string
           p_likes: number
@@ -77,6 +79,7 @@ export type Database = {
           p_url?: string | null
         }
         Update: {
+          p_category?: string | null
           p_comments?: number
           p_id?: string
           p_likes?: number

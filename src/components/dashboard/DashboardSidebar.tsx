@@ -1,13 +1,4 @@
-import { Calendar, Filter, BarChart3, TrendingUp } from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
+import { Filter, BarChart3 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,41 +6,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { DashboardFilters } from "@/pages/Dashboard";
+import { DashboardFilters } from "@/hooks/use-dashboard-data";
+import { useCategories } from "@/hooks/use-categories";
 
 interface DashboardSidebarProps {
   filters: DashboardFilters;
   onFilterChange: (key: keyof DashboardFilters, value: any) => void;
 }
 
-const districts = [
-  { value: "all", label: "Todos los distritos" },
-  { value: "cercado", label: "Cercado de Lima" },
-  { value: "san-isidro", label: "San Isidro" },
-  { value: "miraflores", label: "Miraflores" },
-  { value: "san-borja", label: "San Borja" },
-  { value: "surco", label: "Santiago de Surco" },
-];
-
-const themes = [
-  { value: "all", label: "Todos los temas" },
-  { value: "vias-transporte", label: "Vías y Transporte" },
-  { value: "salud", label: "Salud" },
-  { value: "educacion", label: "Educación" },
-  { value: "seguridad", label: "Seguridad" },
-  { value: "servicios-publicos", label: "Servicios Públicos" },
-  { value: "medio-ambiente", label: "Medio Ambiente" },
-];
+// Las categorías ahora se obtienen dinámicamente de la base de datos
+// const themes = [ ... ]; // Removido - ahora se usa useCategories()
 
 const sentiments = [
   { value: "all", label: "Todos los sentimientos" },
@@ -58,158 +24,191 @@ const sentiments = [
   { value: "neutral", label: "Neutral" },
 ];
 
+// Generar años disponibles (últimos 5 años)
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+// Meses disponibles
+const months = [
+  { value: 1, label: "Enero" },
+  { value: 2, label: "Febrero" },
+  { value: 3, label: "Marzo" },
+  { value: 4, label: "Abril" },
+  { value: 5, label: "Mayo" },
+  { value: 6, label: "Junio" },
+  { value: 7, label: "Julio" },
+  { value: 8, label: "Agosto" },
+  { value: 9, label: "Septiembre" },
+  { value: 10, label: "Octubre" },
+  { value: 11, label: "Noviembre" },
+  { value: 12, label: "Diciembre" },
+];
+
 export function DashboardSidebar({ filters, onFilterChange }: DashboardSidebarProps) {
+  const { categories, loading: categoriesLoading } = useCategories();
+  
   return (
-    <Sidebar className="w-80">
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+    <div className="w-full h-full bg-sidebar border-r border-sidebar-border p-3 overflow-hidden">
+      <div className="h-full flex flex-col">
+        {/* Logo del Proyecto */}
+        <div className="flex-shrink-0 mb-4">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-sidebar-foreground/5 border border-sidebar-border">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+              {/* Replace this with your actual logo image */}
+              <img 
+                src="/icono-vivienda.png" 
+                alt="Logo del Proyecto" 
+                className="w-6 h-6 object-contain"
+              />
+
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold text-sidebar-foreground">SentiData</h2>
+              <p className="text-xs text-sidebar-muted">Dashboard Ciudadano</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros de Análisis */}
+        <div className="flex-shrink-0">
+          <h3 className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground mb-3">
+            <Filter className="h-3 w-3" />
             Filtros de Análisis
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {/* Filtro de Fecha */}
-              <SidebarMenuItem>
-                <div className="filter-section">
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Rango de Fechas
-                  </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !filters.dateRange.from && "text-muted-foreground"
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {filters.dateRange.from ? (
-                          filters.dateRange.to ? (
-                            <>
-                              {format(filters.dateRange.from, "LLL dd, y", { locale: es })} -{" "}
-                              {format(filters.dateRange.to, "LLL dd, y", { locale: es })}
-                            </>
-                          ) : (
-                            format(filters.dateRange.from, "LLL dd, y", { locale: es })
-                          )
-                        ) : (
-                          <span>Seleccionar fechas</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                       <CalendarComponent
-                        initialFocus
-                        mode="range"
-                        defaultMonth={filters.dateRange.from}
-                        selected={{
-                          from: filters.dateRange.from,
-                          to: filters.dateRange.to
-                        }}
-                        onSelect={(range) => onFilterChange("dateRange", range || { from: undefined, to: undefined })}
-                        numberOfMonths={2}
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </SidebarMenuItem>
+          </h3>
+          
+          <div className="space-y-3">
+            {/* Filtro de Fecha */}
+            <div className="filter-section">
+              <label className="text-xs font-medium text-foreground mb-1 block">
+                Período de Análisis
+              </label>
+              
+              {/* Selector de Modo */}
+              <div className="mb-2">
+                <Select 
+                  value={filters.dateMode} 
+                  onValueChange={(value: 'annual' | 'monthly') => onFilterChange('dateMode', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="annual">Anual</SelectItem>
+                    <SelectItem value="monthly">Mensual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Filtro de Distrito */}
-              <SidebarMenuItem>
-                <div className="filter-section">
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Distrito
-                  </label>
-                  <Select
-                    value={filters.district}
-                    onValueChange={(value) => onFilterChange("district", value)}
+              {/* Selector de Año */}
+              <div className="mb-2">
+                <Select 
+                  value={filters.year.toString()} 
+                  onValueChange={(value) => onFilterChange('year', parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Selector de Mes (solo si es modo mensual) */}
+              {filters.dateMode === 'monthly' && (
+                <div className="mb-2">
+                  <Select 
+                    value={filters.month.toString()} 
+                    onValueChange={(value) => onFilterChange('month', parseInt(value))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar distrito" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {districts.map((district) => (
-                        <SelectItem key={district.value} value={district.value}>
-                          {district.label}
+                      {months.map((month) => (
+                        <SelectItem key={month.value} value={month.value.toString()}>
+                          {month.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </SidebarMenuItem>
+              )}
 
-              {/* Filtro de Tema */}
-              <SidebarMenuItem>
-                <div className="filter-section">
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Tema
-                  </label>
-                  <Select
-                    value={filters.theme}
-                    onValueChange={(value) => onFilterChange("theme", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar tema" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {themes.map((theme) => (
-                        <SelectItem key={theme.value} value={theme.value}>
-                          {theme.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </SidebarMenuItem>
+              {/* Información del período seleccionado */}
+              <div className="text-xs text-muted-foreground bg-sidebar-accent p-1.5 rounded">
+                {filters.dateMode === 'annual' ? (
+                  <>Analizando datos del año <strong>{filters.year}</strong></>
+                ) : (
+                  <>Analizando datos de <strong>{months.find(m => m.value === filters.month)?.label} {filters.year}</strong></>
+                )}
+              </div>
+            </div>
 
-              {/* Filtro de Sentimiento */}
-              <SidebarMenuItem>
-                <div className="filter-section">
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    Tipo de Sentimiento
-                  </label>
-                  <Select
-                    value={filters.sentiment}
-                    onValueChange={(value) => onFilterChange("sentiment", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar sentimiento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sentiments.map((sentiment) => (
-                        <SelectItem key={sentiment.value} value={sentiment.value}>
-                          {sentiment.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            {/* Filtro de Tema */}
+            <div className="filter-section">
+              <label className="text-xs font-medium text-foreground mb-1 block">
+                Tema
+              </label>
+              <Select value={filters.theme} onValueChange={(value) => onFilterChange('theme', value)}>
+                <SelectTrigger disabled={categoriesLoading}>
+                  <SelectValue placeholder={categoriesLoading ? "Cargando categorías..." : "Seleccionar tema"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Sección de navegación adicional */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Vista Rápida
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <Button variant="ghost" className="w-full justify-start">
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Resumen Ejecutivo
-                </Button>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+            {/* Filtro de Sentimiento */}
+            <div className="filter-section">
+              <label className="text-xs font-medium text-foreground mb-1 block">
+                Sentimiento
+              </label>
+              <Select value={filters.sentiment} onValueChange={(value) => onFilterChange('sentiment', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sentiments.map((sentiment) => (
+                    <SelectItem key={sentiment.value} value={sentiment.value}>
+                      {sentiment.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Información del Dashboard */}
+        <div className="flex-1 flex flex-col justify-end">
+          <div className="bg-sidebar-accent rounded-lg p-3 border border-sidebar-border">
+            <h4 className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground mb-2">
+              <BarChart3 className="h-3 w-3" />
+              Sobre este Dashboard
+            </h4>
+            <p className="text-xs text-sidebar-foreground leading-relaxed mb-2">
+              SentiData es un proyecto que emplea Inteligencia Artificial para recoger y analizar la percepción ciudadana sobre el sector saneamiento, convirtiéndola en una herramienta estratégica para la mejora continua de los servicios públicos.
+            </p>
+            <div className="flex items-center justify-center pt-2 border-t border-sidebar-border">
+              <img 
+                src="/logo-ministerio.png" 
+                alt="Ministerio de Vivienda" 
+                className="h-10 object-contain opacity-100"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
