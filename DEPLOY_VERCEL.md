@@ -73,6 +73,12 @@ vercel env add VITE_SUPABASE_ANON_KEY
 - **Output Directory:** `dist`
 - **Install Command:** `npm install`
 
+### **5. Dependencias Requeridas:**
+
+Asegúrate de que todas las dependencias estén instaladas, especialmente:
+- **Terser**: Para minificación de código JavaScript
+- **Todas las dependencias de desarrollo**: Para el proceso de build
+
 ## 🔍 Verificación Post-Deploy
 
 ### **1. Funcionalidades a Verificar:**
@@ -142,6 +148,36 @@ vercel logs
 
 # Ver logs en tiempo real
 vercel logs --follow
+```
+
+## 🚨 Troubleshooting
+
+### **Error: "terser not found"**
+```bash
+# Solución: Instalar terser como dependencia de desarrollo
+npm install --save-dev terser
+
+# O reinstalar todas las dependencias
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### **Error: "Build failed"**
+```bash
+# Verificar que todas las dependencias estén instaladas
+npm install
+
+# Verificar variables de entorno
+echo $VITE_SUPABASE_URL
+echo $VITE_SUPABASE_ANON_KEY
+```
+
+### **Error: "Module not found"**
+```bash
+# Limpiar cache y reinstalar
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
 ```
 
 ## 📈 Próximos Pasos
