@@ -307,17 +307,17 @@ function generateTimeSeriesData(posts: Post[], comments: Comment[], dateMode: 'a
             return commentDate.getFullYear() === year && commentDate.getMonth() === month;
           });
 
-          const positiveComments = monthComments.filter(comment => 
+          const positiveComments = Math.max(0, monthComments.filter(comment => 
             comment.c_clasificacion === 'Positiva'
-          ).length;
+          ).length);
 
-          const negativeComments = monthComments.filter(comment => 
+          const negativeComments = Math.max(0, monthComments.filter(comment => 
             comment.c_clasificacion === 'Negativa'
-          ).length;
+          ).length);
 
-          const neutralComments = monthComments.filter(comment => 
+          const neutralComments = Math.max(0, monthComments.filter(comment => 
             comment.c_clasificacion === 'Neutral'
-          ).length;
+          ).length);
 
           // Solo incluir meses con datos
           if (positiveComments > 0 || negativeComments > 0 || neutralComments > 0) {
@@ -352,17 +352,17 @@ function generateTimeSeriesData(posts: Post[], comments: Comment[], dateMode: 'a
         comment.c_time.startsWith(dateStr)
       );
 
-      const positiveComments = dayComments.filter(comment => 
+      const positiveComments = Math.max(0, dayComments.filter(comment => 
         comment.c_clasificacion === 'Positiva'
-      ).length;
+      ).length);
 
-      const negativeComments = dayComments.filter(comment => 
+      const negativeComments = Math.max(0, dayComments.filter(comment => 
         comment.c_clasificacion === 'Negativa'
-      ).length;
+      ).length);
 
-      const neutralComments = dayComments.filter(comment => 
+      const neutralComments = Math.max(0, dayComments.filter(comment => 
         comment.c_clasificacion === 'Neutral'
-      ).length;
+      ).length);
 
       data.push({
         date: `${currentDate.getDate()}/${currentDate.getMonth() + 1}`,

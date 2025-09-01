@@ -168,10 +168,6 @@ Ver [DEPLOY_VERCEL.md](DEPLOY_VERCEL.md) para instrucciones detalladas.
 
 ## 🔐 Autenticación
 
-### **Credenciales de Prueba**
-- **Email**: `santiagozevallos.01@gmail.com`
-- **Contraseña**: `1234`
-
 ### **Configuración de Seguridad**
 - Row Level Security (RLS) habilitado
 - Políticas de acceso configuradas

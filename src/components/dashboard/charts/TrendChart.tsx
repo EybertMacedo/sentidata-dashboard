@@ -40,7 +40,9 @@ export function TrendChart({ data }: TrendChartProps) {
       
       // Usar los datos de ejemplo
       const chartData = exampleData;
-      const maxValue = Math.max(...chartData.map(d => Math.max(d.positive, d.negative, d.neutral)));
+      const allValues = chartData.flatMap(d => [d.positive, d.negative, d.neutral]);
+      const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
+      const safeMaxValue = Math.min(maxValue, 1000000);
       
       return (
         <div className="h-full flex flex-col transition-all duration-300" key="example-data">
@@ -62,13 +64,29 @@ export function TrendChart({ data }: TrendChartProps) {
                 />
                 <YAxis 
                   tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                  domain={[0, maxValue * 1.1]}
+                  domain={[0, safeMaxValue * 1.1]}
+                  tickFormatter={(value) => {
+                    // Formatear números grandes de manera legible
+                    if (value >= 1000000) {
+                      return `${(value / 1000000).toFixed(1)}M`;
+                    } else if (value >= 1000) {
+                      return `${(value / 1000).toFixed(1)}K`;
+                    }
+                    return value.toString();
+                  }}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    value.toLocaleString('es-ES'),
-                    name === 'positive' ? 'Positivos' : name === 'negative' ? 'Negativos' : 'Neutrales'
-                  ]}
+                  formatter={(value: number, name: string, props: any) => {
+                    // Usar el dataKey del props para determinar el tipo correcto
+                    const dataKey = props.dataKey;
+                    let label = '';
+                    if (dataKey === 'positive') label = 'Positivos';
+                    else if (dataKey === 'negative') label = 'Negativos';
+                    else if (dataKey === 'neutral') label = 'Neutrales';
+                    else label = name; // fallback
+                    
+                    return [value.toLocaleString('es-ES'), label];
+                  }}
                   labelFormatter={(label) => `Fecha: ${label}`}
                   contentStyle={{
                     backgroundColor: "hsl(var(--card))",
@@ -78,7 +96,16 @@ export function TrendChart({ data }: TrendChartProps) {
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                <Legend 
+                  wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                  formatter={(value, entry) => {
+                    // Asegurar que la leyenda muestre los nombres correctos
+                    if (entry.dataKey === 'positive') return 'Positivos';
+                    if (entry.dataKey === 'negative') return 'Negativos';
+                    if (entry.dataKey === 'neutral') return 'Neutrales';
+                    return value;
+                  }}
+                />
                 <Line 
                   type="monotone" 
                   dataKey="positive" 
@@ -124,19 +151,21 @@ export function TrendChart({ data }: TrendChartProps) {
     );
   }
 
-  // Formatear los datos para el gráfico
+  // Formatear los datos para el gráfico con validación robusta
   const chartData = timeSeriesData.map(item => ({
     ...item,
-    // Asegurar que los valores numéricos sean números válidos
-    positive: Number(item.positive) || 0,
-    negative: Number(item.negative) || 0,
-    neutral: Number(item.neutral) || 0,
+    // Asegurar que los valores numéricos sean números válidos y razonables
+    positive: Math.max(0, Math.min(Number(item.positive) || 0, 1000000)), // Máximo 1M
+    negative: Math.max(0, Math.min(Number(item.negative) || 0, 1000000)), // Máximo 1M
+    neutral: Math.max(0, Math.min(Number(item.neutral) || 0, 1000000)), // Máximo 1M
   }));
 
   // Encontrar el valor máximo para escalar el eje Y apropiadamente
-  const maxValue = Math.max(
-    ...chartData.map(d => Math.max(d.positive, d.negative, d.neutral))
-  );
+  const allValues = chartData.flatMap(d => [d.positive, d.negative, d.neutral]);
+  const maxValue = allValues.length > 0 ? Math.max(...allValues) : 0;
+  
+  // Asegurar que el valor máximo sea razonable
+  const safeMaxValue = Math.min(maxValue, 1000000);
 
   // Si todos los valores son 0, mostrar mensaje
   if (maxValue === 0) {
@@ -212,13 +241,29 @@ export function TrendChart({ data }: TrendChartProps) {
             />
             <YAxis 
               tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-              domain={[0, maxValue * 1.1]} // Añadir 10% de espacio arriba
+              domain={[0, safeMaxValue * 1.1]} // Añadir 10% de espacio arriba
+              tickFormatter={(value) => {
+                // Formatear números grandes de manera legible
+                if (value >= 1000000) {
+                  return `${(value / 1000000).toFixed(1)}M`;
+                } else if (value >= 1000) {
+                  return `${(value / 1000).toFixed(1)}K`;
+                }
+                return value.toString();
+              }}
             />
             <Tooltip
-              formatter={(value: number, name: string) => [
-                value.toLocaleString('es-ES'),
-                name === 'positive' ? 'Comentarios Positivos' : name === 'negative' ? 'Comentarios Negativos' : 'Comentarios Neutrales'
-              ]}
+              formatter={(value: number, name: string, props: any) => {
+                // Usar el dataKey del props para determinar el tipo correcto
+                const dataKey = props.dataKey;
+                let label = '';
+                if (dataKey === 'positive') label = 'Comentarios Positivos';
+                else if (dataKey === 'negative') label = 'Comentarios Negativos';
+                else if (dataKey === 'neutral') label = 'Comentarios Neutrales';
+                else label = name; // fallback
+                
+                return [value.toLocaleString('es-ES'), label];
+              }}
               labelFormatter={(label) => `Período: ${label}`}
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
@@ -232,6 +277,13 @@ export function TrendChart({ data }: TrendChartProps) {
               wrapperStyle={{
                 fontSize: '12px',
                 paddingTop: '10px'
+              }}
+              formatter={(value, entry) => {
+                // Asegurar que la leyenda muestre los nombres correctos
+                if (entry.dataKey === 'positive') return 'Comentarios Positivos';
+                if (entry.dataKey === 'negative') return 'Comentarios Negativos';
+                if (entry.dataKey === 'neutral') return 'Comentarios Neutrales';
+                return value;
               }}
             />
             <Line 
