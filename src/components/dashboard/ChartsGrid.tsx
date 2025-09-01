@@ -69,7 +69,7 @@ export function ChartsGrid({ data, loading }: ChartsGridProps) {
       <Card className="flex flex-col bg-card h-full min-h-0 shadow-sm hover:shadow-md transition-all duration-200">
         <div className="flex items-center justify-between px-0.5 sm:px-4 pt-0.5 sm:pt-3 pb-0">
           <CardTitle className="text-xs font-semibold text-foreground">
-            Palabras Más Frecuentes
+            Palabras más Frecuentes
           </CardTitle>
         </div>
         <CardContent className="flex-1 min-h-0 p-0.5 sm:p-1">
