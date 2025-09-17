@@ -9,7 +9,7 @@ interface WordCloudChartProps {
 interface WordData {
   text: string;
   value: number;
-  sentiment: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
 }
 
 // Datos de ejemplo desactivados - solo se muestran datos reales
@@ -61,93 +61,57 @@ const palabrasIgnorar = new Set([
 ]);
 
 export function WordCloudChart({ data }: WordCloudChartProps) {
-  const { posts, comments } = data;
+  const { comments } = data;
 
-  // Extraer palabras de los textos de los posts y asociarlas con sentimientos
+  // Construir nube de palabras desde los comentarios (tokenización robusta y sentimiento por token)
   const words = useMemo(() => {
-    const wordData: { [key: string]: { count: number; sentiment: string } } = {};
-    
-    // Debug: mostrar información en consola
-    console.log('=== DEBUG WORDCLOUD ===');
-    console.log('Posts disponibles:', posts.length);
-    console.log('Comentarios disponibles:', comments.length);
-    
-    posts.forEach(post => {
-      if (post.p_text) {
-        // Limpiar y dividir el texto en palabras
-        const words = post.p_text
-          .toLowerCase()
-          .replace(/[^\w\sáéíóúñ]/g, '') // Remover caracteres especiales pero mantener acentos
-          .split(/\s+/)
-          .filter(word => {
-            // Filtrar palabras: longitud mínima y no estar en la lista de ignoradas
-            return word.length > 2 && !palabrasIgnorar.has(word);
-          });
-        
-        words.forEach(word => {
-          if (wordData[word]) {
-            wordData[word].count++;
-          } else {
-            // Buscar el sentimiento predominante de esta palabra en los comentarios
-            const relatedComments = comments.filter(comment => 
-              comment.c_text && comment.c_text.toLowerCase().includes(word)
-            );
-            
-            let positiveCount = 0;
-            let negativeCount = 0;
-            let neutralCount = 0;
-            
-            relatedComments.forEach(comment => {
-              switch (comment.c_clasificacion) {
-                case 'positive':
-                  positiveCount++;
-                  break;
-                case 'negative':
-                  negativeCount++;
-                  break;
-                case 'neutral':
-                  neutralCount++;
-                  break;
-              }
-            });
-            
-            // Determinar el sentimiento predominante
-            let predominantSentiment = 'neutral';
-            if (positiveCount > negativeCount && positiveCount > neutralCount) {
-              predominantSentiment = 'positive';
-            } else if (negativeCount > positiveCount && negativeCount > neutralCount) {
-              predominantSentiment = 'negative';
-            }
-            
-            wordData[word] = {
-              count: 1,
-              sentiment: predominantSentiment
-            };
-          }
-        });
+    if (!comments || comments.length === 0) return [] as WordData[];
+
+    const normalizeToEnglish = (raw: string | null): 'positive' | 'negative' | 'neutral' => {
+      if (!raw) return 'neutral';
+      const value = String(raw)
+        .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+        .trim().toLowerCase();
+      if (['positiva', 'positivo', 'positive', 'pos', 'posi', '+'].includes(value)) return 'positive';
+      if (['negativa', 'negativo', 'negative', 'neg', '-'].includes(value)) return 'negative';
+      if (['neutral', 'neutro', 'neu', 'mixed', 'mixto'].includes(value)) return 'neutral';
+      return 'neutral';
+    };
+
+    const tokenStats = new Map<string, { count: number; positive: number; negative: number; neutral: number }>();
+
+    for (const c of comments) {
+      const text = (c.c_text || '').toString().toLowerCase();
+      if (!text) continue;
+
+      // Extraer tokens alfanuméricos incluyendo tildes/ñ
+      const tokens = text.match(/[a-záéíóúñ0-9]+/gi) || [];
+      const sentiment = normalizeToEnglish(c.c_clasificacion as any);
+
+      for (const raw of tokens) {
+        const token = raw.normalize('NFD').replace(/\p{Diacritic}/gu, '').trim();
+        if (token.length <= 2) continue;
+        if (palabrasIgnorar.has(token)) continue;
+
+        let s = tokenStats.get(token);
+        if (!s) {
+          s = { count: 0, positive: 0, negative: 0, neutral: 0 };
+          tokenStats.set(token, s);
+        }
+        s.count += 1;
+        s[sentiment] += 1;
       }
+    }
+
+    const list: WordData[] = Array.from(tokenStats.entries()).map(([text, s]) => {
+      let predominant: 'positive' | 'negative' | 'neutral' = 'neutral';
+      if (s.positive > s.negative && s.positive > s.neutral) predominant = 'positive';
+      else if (s.negative > s.positive && s.negative > s.neutral) predominant = 'negative';
+      return { text, value: s.count, sentiment: predominant };
     });
 
-    // Debug: mostrar palabras encontradas
-    console.log('Palabras únicas encontradas:', Object.keys(wordData).length);
-    console.log('Distribución de palabras:', Object.entries(wordData).slice(0, 10));
-
-    // Convertir a array y ordenar por frecuencia
-    const result = Object.entries(wordData)
-      .map(([text, data]) => ({ text, value: data.count, sentiment: data.sentiment }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 25); // Limitar a 25 palabras máximo
-
-    console.log('Palabras finales para wordcloud:', result.length);
-    
-    // Si no hay suficientes palabras reales, mostrar mensaje en lugar de mock data
-    if (result.length < 5) {
-      console.log('No hay suficientes palabras reales, mostrando mensaje de no datos');
-      return [];
-    }
-    
-    return result;
-  }, [posts, comments]);
+    return list.sort((a, b) => b.value - a.value).slice(0, 40);
+  }, [comments]);
 
   // Si no hay palabras, mostrar mensaje
   if (words.length === 0) {
@@ -244,9 +208,9 @@ export function WordCloudChart({ data }: WordCloudChartProps) {
         words={words}
         width={280}
         height={200}
-        fontSize={(d) => Math.max(d.value * 0.4, 8)} // Reducir más el multiplicador
+        fontSize={(d) => Math.max(Math.min(d.value * 0.6, 40), 12)}
         font="Inter, system-ui, sans-serif"
-        padding={2} // Reducir padding para mejor ajuste
+        padding={2}
         rotate={0}
         random={() => 0.5}
         spiral="archimedean"

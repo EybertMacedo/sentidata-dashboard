@@ -237,6 +237,23 @@ export function useDashboardDataAuth(filters: DashboardFilters) {
         return;
       }
 
+      // Utilidades de normalización de sentimiento
+      const normalizeToSpanish = (raw: string | null): 'Positiva' | 'Negativa' | 'Neutral' => {
+        if (!raw) return 'Neutral';
+        const value = String(raw)
+          .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+          .trim().toLowerCase();
+        if (['positiva', 'positivo', 'positive', 'pos', 'posi', '+'].includes(value)) return 'Positiva';
+        if (['negativa', 'negativo', 'negative', 'neg', '-'].includes(value)) return 'Negativa';
+        if (['neutral', 'neutro', 'neu', 'mixed', 'mixto'].includes(value)) return 'Neutral';
+        return 'Neutral';
+      };
+
+      const normalizeToEnglish = (raw: string | null): 'positive' | 'negative' | 'neutral' => {
+        const es = normalizeToSpanish(raw);
+        return es === 'Positiva' ? 'positive' : es === 'Negativa' ? 'negative' : 'neutral';
+      };
+
       // Calcular distribución de sentimientos
       const sentimentDistribution = {
         positive: 0,
@@ -245,19 +262,8 @@ export function useDashboardDataAuth(filters: DashboardFilters) {
       };
 
       comments?.forEach(comment => {
-        switch (comment.c_clasificacion) {
-          case 'Positiva':
-            sentimentDistribution.positive++;
-            break;
-          case 'Negativa':
-            sentimentDistribution.negative++;
-            break;
-          case 'Neutral':
-            sentimentDistribution.neutral++;
-            break;
-          default:
-            sentimentDistribution.neutral++;
-        }
+        const mapped = normalizeToEnglish(comment.c_clasificacion);
+        sentimentDistribution[mapped as keyof typeof sentimentDistribution]++;
       });
 
       // Calcular métricas básicas
@@ -297,19 +303,8 @@ export function useDashboardDataAuth(filters: DashboardFilters) {
             acc[dateKey] = { positive: 0, negative: 0, neutral: 0 };
           }
           
-          switch (comment.c_clasificacion) {
-            case 'Positiva':
-              acc[dateKey].positive++;
-              break;
-            case 'Negativa':
-              acc[dateKey].negative++;
-              break;
-            case 'Neutral':
-              acc[dateKey].neutral++;
-              break;
-            default:
-              acc[dateKey].neutral++;
-          }
+          const mapped = normalizeToEnglish(comment.c_clasificacion);
+          acc[dateKey][mapped]++;
           
           return acc;
         }, {} as { [key: string]: { positive: number; negative: number; neutral: number } });

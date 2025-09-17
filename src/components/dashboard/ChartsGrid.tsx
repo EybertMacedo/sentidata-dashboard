@@ -3,6 +3,7 @@ import type { DashboardData } from "@/hooks/use-dashboard-data";
 import { ThemeCommentsChart } from "./charts/ThemeCommentsChart";
 import { TrendChart } from "./charts/TrendChart";
 import { SentimentDonutChart } from "./charts/SentimentDonutChart";
+import { SentimentDistributionPanel } from "./charts/SentimentDistributionPanel";
 import { WordCloudChart } from "./charts/WordCloudChart";
 import { CategoryDistributionChart } from "./charts/CategoryDistributionChart";
 import { CombinedDistributionChart } from "./charts/CombinedDistributionChart";
@@ -53,7 +54,7 @@ export function ChartsGrid({ data, loading }: ChartsGridProps) {
         </CardContent>
       </Card>
 
-      {/* Gráfico de Pie - Distribución de Sentimientos */}
+      {/* Panel de Sentimientos - Pie y Densidad */}
       <Card className="flex flex-col bg-card h-full min-h-0 shadow-sm hover:shadow-md transition-all duration-200">
         <div className="flex items-center justify-between px-0.5 sm:px-4 pt-0.5 sm:pt-3 pb-0">
           <CardTitle className="text-xs font-semibold text-foreground">
@@ -61,7 +62,7 @@ export function ChartsGrid({ data, loading }: ChartsGridProps) {
           </CardTitle>
         </div>
         <CardContent className="flex-1 min-h-0 p-0.5 sm:p-1">
-          <SentimentDonutChart data={data} />
+          <SentimentDistributionPanel data={data} />
         </CardContent>
       </Card>
 

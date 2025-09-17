@@ -17,11 +17,30 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
   console.log('Comments count:', data?.comments?.length);
   console.log('=====================================');
 
-  // Verificar si hay datos reales disponibles
-  if (!data?.sentimentDistribution || 
-      (data.sentimentDistribution.positive === 0 && 
-       data.sentimentDistribution.negative === 0 && 
-       data.sentimentDistribution.neutral === 0)) {
+  // Calcular distribución desde c_clasificacion directamente
+  const comments = data?.comments || [];
+  const normalizeToEnglish = (raw: string | null): 'positive' | 'negative' | 'neutral' => {
+    if (!raw) return 'neutral';
+    const value = String(raw)
+      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+      .trim().toLowerCase();
+    if (['positiva', 'positivo', 'positive', 'pos', 'posi', '+'].includes(value)) return 'positive';
+    if (['negativa', 'negativo', 'negative', 'neg', '-'].includes(value)) return 'negative';
+    if (['neutral', 'neutro', 'neu', 'mixed', 'mixto'].includes(value)) return 'neutral';
+    return 'neutral';
+  };
+
+  const sentimentDistribution = comments.reduce(
+    (acc: { positive: number; negative: number; neutral: number }, c: any) => {
+      const mapped = normalizeToEnglish(c.c_clasificacion);
+      acc[mapped]++;
+      return acc;
+    },
+    { positive: 0, negative: 0, neutral: 0 }
+  );
+
+  // Verificar si hay datos disponibles
+  if (!data || (sentimentDistribution.positive === 0 && sentimentDistribution.negative === 0 && sentimentDistribution.neutral === 0)) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center text-muted-foreground">
@@ -32,11 +51,9 @@ export function SentimentDonutChart({ data }: SentimentDonutChartProps) {
     );
   }
 
-  // Usar solo datos reales
-  const { sentimentDistribution } = data;
   const totalSentimentComments = sentimentDistribution.positive + sentimentDistribution.negative + sentimentDistribution.neutral;
   
-  console.log('=== USANDO DATOS REALES ===');
+  console.log('=== USANDO DATOS DE CLASIFICACIÓN ===');
   console.log('Positive:', sentimentDistribution.positive);
   console.log('Negative:', sentimentDistribution.negative);
   console.log('Neutral:', sentimentDistribution.neutral);

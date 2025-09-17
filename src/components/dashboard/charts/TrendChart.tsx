@@ -17,8 +17,73 @@ export function TrendChart({ data }: TrendChartProps) {
   console.log('Data length:', timeSeriesData?.length);
   console.log('========================');
 
-  // Si no hay datos, mostrar mensaje
-  if (!timeSeriesData || timeSeriesData.length === 0) {
+  // Fallback: si no hay series, generarlas desde comments agrupando por día
+  const buildFallbackSeries = () => {
+    const comments = data?.comments || [];
+    if (!comments || comments.length === 0) return [];
+    const normalizeToEnglish = (raw: string | null): 'positive' | 'negative' | 'neutral' => {
+      if (!raw) return 'neutral';
+      const value = String(raw)
+        .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+        .trim().toLowerCase();
+      if (['positiva', 'positivo', 'positive', 'pos', 'posi', '+'].includes(value)) return 'positive';
+      if (['negativa', 'negativo', 'negative', 'neg', '-'].includes(value)) return 'negative';
+      if (['neutral', 'neutro', 'neu', 'mixed', 'mixto'].includes(value)) return 'neutral';
+      return 'neutral';
+    };
+
+    const byDate: Record<string, { positive: number; negative: number; neutral: number }> = {};
+    for (const c of comments) {
+      const date = new Date(c.c_time);
+      if (isNaN(date.getTime())) continue;
+      const key = `${date.getDate()}/${date.getMonth() + 1}`;
+      if (!byDate[key]) byDate[key] = { positive: 0, negative: 0, neutral: 0 };
+      const mapped = normalizeToEnglish((c as any).c_clasificacion ?? null);
+      byDate[key][mapped]++;
+    }
+    return Object.entries(byDate)
+      .map(([date, counts]) => ({ date, ...counts }))
+      .sort((a, b) => {
+        const [da, ma] = a.date.split('/').map(Number);
+        const [db, mb] = b.date.split('/').map(Number);
+        return (ma - mb) || (da - db);
+      });
+  };
+
+  const fallbackSeries = buildFallbackSeries();
+  // Si la serie del hook es muy gruesa (pocos puntos), preferir la serie diaria de fallback
+  const effectiveSeriesRaw = (timeSeriesData && timeSeriesData.length > 15) ? timeSeriesData : fallbackSeries;
+
+  // Reducir número de puntos agregando en buckets cuando la serie es muy larga
+  const aggregateSeries = (series: typeof effectiveSeriesRaw, targetPoints = 24) => {
+    if (!series || series.length === 0) return [] as typeof series;
+    if (series.length <= targetPoints) return series;
+
+    const bucketSize = Math.ceil(series.length / targetPoints);
+    const aggregated: { date: string; positive: number; negative: number; neutral: number }[] = [];
+    for (let i = 0; i < series.length; i += bucketSize) {
+      const bucket = series.slice(i, i + bucketSize);
+      const startLabel = bucket[0]?.date ?? '';
+      const endLabel = bucket[bucket.length - 1]?.date ?? '';
+      const label = startLabel === endLabel ? startLabel : `${startLabel}-${endLabel}`;
+      const sums = bucket.reduce(
+        (acc, it) => {
+          acc.positive += Number(it.positive) || 0;
+          acc.negative += Number(it.negative) || 0;
+          acc.neutral += Number(it.neutral) || 0;
+          return acc;
+        },
+        { positive: 0, negative: 0, neutral: 0 }
+      );
+      aggregated.push({ date: label, ...sums });
+    }
+    return aggregated;
+  };
+
+  const effectiveSeries = aggregateSeries(effectiveSeriesRaw, 60);
+
+  // Si sigue sin haber datos, mostrar mensaje
+  if (!effectiveSeries || effectiveSeries.length === 0) {
     return (
       <div className="flex items-center justify-center h-full transition-opacity duration-300">
         <div className="text-center text-muted-foreground">
@@ -35,7 +100,7 @@ export function TrendChart({ data }: TrendChartProps) {
   console.log('Data length:', timeSeriesData?.length);
   
   // Formatear los datos para el gráfico con validación robusta
-  const chartData = timeSeriesData.map((item, index) => {
+  const chartData = effectiveSeries.map((item, index) => {
     const positive = Math.max(0, Math.min(Number(item.positive) || 0, 1000000));
     const negative = Math.max(0, Math.min(Number(item.negative) || 0, 1000000));
     const neutral = Math.max(0, Math.min(Number(item.neutral) || 0, 1000000));
@@ -199,7 +264,7 @@ export function TrendChart({ data }: TrendChartProps) {
               stroke="hsl(var(--success))"
               strokeWidth={2}
               name="Comentarios Positivos"
-              dot={{ fill: "hsl(var(--success))", strokeWidth: 2, r: 3 }}
+              dot={false}
               activeDot={{ r: 5, stroke: "hsl(var(--success))", strokeWidth: 2 }}
               connectNulls={false}
             />
@@ -209,7 +274,7 @@ export function TrendChart({ data }: TrendChartProps) {
               stroke="hsl(var(--destructive))"
               strokeWidth={2}
               name="Comentarios Negativos"
-              dot={{ fill: "hsl(var(--destructive))", strokeWidth: 2, r: 3 }}
+              dot={false}
               activeDot={{ r: 5, stroke: "hsl(var(--destructive))", strokeWidth: 2 }}
               connectNulls={false}
             />
@@ -220,7 +285,7 @@ export function TrendChart({ data }: TrendChartProps) {
               strokeWidth={2}
               strokeDasharray="5 5"
               name="Comentarios Neutrales"
-              dot={{ fill: "#D97706", strokeWidth: 2, r: 3 }}
+              dot={false}
               activeDot={{ r: 5, stroke: "#D97706", strokeWidth: 2 }}
               connectNulls={false}
             />

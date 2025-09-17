@@ -37,10 +37,22 @@ export function KPICards({ data, loading }: KPICardsProps) {
   const negativePercentage = totalSentimentComments > 0 ? (sentimentDistribution.negative / totalSentimentComments) * 100 : 0;
   const neutralPercentage = totalSentimentComments > 0 ? (sentimentDistribution.neutral / totalSentimentComments) * 100 : 0;
 
-  // Obtener comentarios reales de la base de datos por sentimiento
-  const positiveComments = comments.filter(comment => comment.c_clasificacion === 'Positiva');
-  const neutralComments = comments.filter(comment => comment.c_clasificacion === 'Neutral');
-  const negativeComments = comments.filter(comment => comment.c_clasificacion === 'Negativa');
+  // Normalización para contar comentarios por sentimiento de forma consistente
+  const normalizeToEnglish = (raw: string | null): 'positive' | 'negative' | 'neutral' => {
+    if (!raw) return 'neutral';
+    const value = String(raw)
+      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+      .trim().toLowerCase();
+    if (['positiva', 'positivo', 'positive', 'pos', 'posi', '+'].includes(value)) return 'positive';
+    if (['negativa', 'negativo', 'negative', 'neg', '-'].includes(value)) return 'negative';
+    if (['neutral', 'neutro', 'neu', 'mixed', 'mixto'].includes(value)) return 'neutral';
+    return 'neutral';
+  };
+
+  // Obtener comentarios reales de la base de datos por sentimiento (normalizado)
+  const positiveComments = comments.filter(comment => normalizeToEnglish(comment.c_clasificacion) === 'positive');
+  const neutralComments = comments.filter(comment => normalizeToEnglish(comment.c_clasificacion) === 'neutral');
+  const negativeComments = comments.filter(comment => normalizeToEnglish(comment.c_clasificacion) === 'negative');
 
   // Mensajes estáticos en lugar de comentarios aleatorios
   const positiveMessage = positiveComments.length > 0 
