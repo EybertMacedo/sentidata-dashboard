@@ -20,11 +20,11 @@ export function DataTest({ onRLSError }: DataTestProps) {
       console.log('🧪 Iniciando prueba de conexión...');
       
       // Prueba 1: Conteo básico de posts
-      const { data: postsCount, error: postsError } = await supabase
-        .from('posts')
+      const { count: postsCount, error: postsError } = await supabase
+        .from('posts_v2')
         .select('*', { count: 'exact', head: true });
       
-      console.log('📊 Resultado posts:', { data: postsCount, error: postsError });
+      console.log('📊 Resultado posts:', { count: postsCount, error: postsError });
       
               if (postsError) {
           console.error('❌ Error en posts:', postsError);
@@ -37,11 +37,11 @@ export function DataTest({ onRLSError }: DataTestProps) {
         }
       
       // Prueba 2: Conteo básico de comentarios
-      const { data: commentsCount, error: commentsError } = await supabase
-        .from('comments')
+      const { count: commentsCount, error: commentsError } = await supabase
+        .from('comments_v2')
         .select('*', { count: 'exact', head: true });
       
-      console.log('📊 Resultado comments:', { data: commentsCount, error: commentsError });
+      console.log('📊 Resultado comments:', { count: commentsCount, error: commentsError });
       
               if (commentsError) {
           console.error('❌ Error en comments:', commentsError);
@@ -55,7 +55,7 @@ export function DataTest({ onRLSError }: DataTestProps) {
       
       // Prueba 3: Obtener algunos posts de ejemplo
       const { data: samplePosts, error: samplePostsError } = await supabase
-        .from('posts')
+        .from('posts_v2')
         .select('*')
         .limit(3);
       
@@ -65,7 +65,7 @@ export function DataTest({ onRLSError }: DataTestProps) {
       
       // Prueba 4: Obtener algunos comentarios de ejemplo
       const { data: sampleComments, error: sampleCommentsError } = await supabase
-        .from('comments')
+        .from('comments_v2')
         .select('*')
         .limit(3);
       
@@ -74,8 +74,8 @@ export function DataTest({ onRLSError }: DataTestProps) {
       }
       
       setTestData({
-        postsCount: postsCount.count || 0,
-        commentsCount: commentsCount.count || 0,
+        postsCount: postsCount || 0,
+        commentsCount: commentsCount || 0,
         samplePosts,
         sampleComments
       });

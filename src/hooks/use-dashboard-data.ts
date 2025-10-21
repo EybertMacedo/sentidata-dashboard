@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
-type Post = Database['public']['Tables']['posts']['Row'];
-type Comment = Database['public']['Tables']['comments']['Row'];
+type Post = Database['public']['Tables']['posts_v2']['Row'];
+type Comment = Database['public']['Tables']['comments_v2']['Row'];
 
 export interface DashboardFilters {
   dateMode: 'annual' | 'monthly';
@@ -62,26 +62,47 @@ export function useDashboardData(filters: DashboardFilters) {
 
         console.log('🚀 Iniciando fetch de datos...');
 
-        // Obtener posts primero
-        console.log('📥 Ejecutando consulta de posts...');
-        let postsQuery = supabase.from('posts').select('*');
-        
-        // Aplicar filtros de fecha si están definidos
-        if (filters.dateMode === 'annual') {
-          postsQuery = postsQuery.gte('p_time', `${filters.year}-01-01T00:00:00.000Z`).lte('p_time', `${filters.year}-12-31T23:59:59.999Z`);
-        } else if (filters.dateMode === 'monthly') {
-          postsQuery = postsQuery.gte('p_time', `${filters.year}-${filters.month}-01T00:00:00.000Z`).lte('p_time', `${filters.year}-${filters.month}-${new Date(filters.year, filters.month, 0).getDate()}T23:59:59.999Z`);
+        // Obtener posts con paginación
+        console.log('📥 Ejecutando consulta de posts con paginación...');
+        let allPosts: Post[] = [];
+        let postsOffset = 0;
+        const postsBatchSize = 1000;
+        let postsHasMore = true;
+
+        while (postsHasMore) {
+          let postsQuery = supabase.from('posts_v2').select('*').range(postsOffset, postsOffset + postsBatchSize - 1);
+          
+          // Aplicar filtros de fecha si están definidos
+          if (filters.dateMode === 'annual') {
+            postsQuery = postsQuery.gte('p_time', `${filters.year}-01-01T00:00:00.000Z`).lte('p_time', `${filters.year}-12-31T23:59:59.999Z`);
+          } else if (filters.dateMode === 'monthly') {
+            postsQuery = postsQuery.gte('p_time', `${filters.year}-${filters.month}-01T00:00:00.000Z`).lte('p_time', `${filters.year}-${filters.month}-${new Date(filters.year, filters.month, 0).getDate()}T23:59:59.999Z`);
+          }
+
+          // Aplicar filtro de categoría si no es "all"
+          if (filters.theme !== 'all' && filters.theme !== '') {
+            postsQuery = postsQuery.eq('p_category', filters.theme);
+            console.log('📂 Filtro de categoría aplicado a posts:', filters.theme);
+          }
+
+          const postsResult = await postsQuery;
+          if (postsResult.error) throw postsResult.error;
+          
+          if (postsResult.data && postsResult.data.length > 0) {
+            allPosts = [...allPosts, ...postsResult.data];
+            postsOffset += postsBatchSize;
+            console.log(`📦 Lote de posts obtenido: ${postsResult.data.length} posts (total: ${allPosts.length})`);
+            
+            // Si obtenemos menos del tamaño del lote, hemos terminado
+            if (postsResult.data.length < postsBatchSize) {
+              postsHasMore = false;
+            }
+          } else {
+            postsHasMore = false;
+          }
         }
 
-        // Aplicar filtro de categoría si no es "all"
-        if (filters.theme !== 'all' && filters.theme !== '') {
-          postsQuery = postsQuery.eq('p_category', filters.theme);
-          console.log('📂 Filtro de categoría aplicado a posts:', filters.theme);
-        }
-
-        const postsResult = await postsQuery;
-        if (postsResult.error) throw postsResult.error;
-        let posts = postsResult.data || [];
+        let posts = allPosts;
 
         // Obtener comentarios con paginación manual y filtros
         console.log('📥 Obteniendo comentarios con paginación y filtros...');
@@ -89,6 +110,8 @@ export function useDashboardData(filters: DashboardFilters) {
         let offset = 0;
         const batchSize = 1000;
         let hasMore = true;
+        let batchCount = 0;
+        const maxBatches = 50; // Limitar a 50,000 comentarios para evitar timeouts
 
         // Si hay filtro de categoría, obtener los p_id de los posts de esa categoría
         let postIds: string[] = [];
@@ -97,9 +120,9 @@ export function useDashboardData(filters: DashboardFilters) {
           console.log('📂 Filtro de categoría para comentarios - Post IDs:', postIds.length);
         }
 
-        while (hasMore) {
+        while (hasMore && batchCount < maxBatches) {
           let batchQuery = supabase
-            .from('comments')
+            .from('comments_v2')
             .select('*')
             .range(offset, offset + batchSize - 1);
 
@@ -133,7 +156,8 @@ export function useDashboardData(filters: DashboardFilters) {
           if (batchComments && batchComments.length > 0) {
             allComments = [...allComments, ...batchComments];
             offset += batchSize;
-            console.log(`📦 Lote obtenido: ${batchComments.length} comentarios (total: ${allComments.length})`);
+            batchCount++;
+            console.log(`📦 Lote ${batchCount} obtenido: ${batchComments.length} comentarios (total: ${allComments.length})`);
             
             // Si obtenemos menos del tamaño del lote, hemos terminado
             if (batchComments.length < batchSize) {

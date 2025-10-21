@@ -23,7 +23,7 @@ export function useCategories() {
       console.log('📂 Obteniendo categorías únicas de la base de datos...');
       
       const { data: posts, error: fetchError } = await supabase
-        .from('posts')
+        .from('posts_v2')
         .select('p_category')
         .not('p_category', 'is', null);
 

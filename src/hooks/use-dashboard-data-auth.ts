@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from './use-auth';
 
-type Post = Database['public']['Tables']['posts']['Row'];
-type Comment = Database['public']['Tables']['comments']['Row'];
+type Post = Database['public']['Tables']['posts_v2']['Row'];
+type Comment = Database['public']['Tables']['comments_v2']['Row'];
 
 export interface DashboardFilters {
   dateMode: 'annual' | 'monthly';
@@ -44,7 +44,7 @@ export interface DashboardData {
 export async function getAvailableCategories(): Promise<string[]> {
   try {
     const { data: posts, error } = await supabase
-      .from('posts')
+      .from('posts_v2')
       .select('p_category')
       .not('p_category', 'is', null);
 
@@ -130,7 +130,7 @@ export function useDashboardDataAuth(filters: DashboardFilters) {
       // Obtener posts con filtros de fecha y categoría
       console.log('📥 Obteniendo posts con filtros de fecha y categoría...');
       let postsQuery = supabase
-        .from('posts')
+        .from('posts_v2')
         .select('*')
         .gte('p_time', startDate.toISOString())
         .lte('p_time', endDate.toISOString());
@@ -169,7 +169,7 @@ export function useDashboardDataAuth(filters: DashboardFilters) {
 
       while (hasMore) {
         let commentsQuery = supabase
-          .from('comments')
+          .from('comments_v2')
           .select('*')
           .gte('c_time', startDate.toISOString())
           .lte('c_time', endDate.toISOString())

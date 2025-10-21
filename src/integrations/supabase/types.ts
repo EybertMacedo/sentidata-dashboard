@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      comments: {
+      comments_v2: {
         Row: {
           c_clasificacion: string | null
           c_comments: number
@@ -50,12 +50,12 @@ export type Database = {
             foreignKeyName: "comments_p_id_fkey"
             columns: ["p_id"]
             isOneToOne: false
-            referencedRelation: "posts"
+            referencedRelation: "posts_v2"
             referencedColumns: ["p_id"]
           },
         ]
       }
-      posts: {
+      posts_v2: {
         Row: {
           p_category: string | null
           p_comments: number

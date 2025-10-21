@@ -20,7 +20,7 @@ export function DebugPanel({ data, loading, error }: DebugPanelProps) {
       try {
         // Verificar conexión básica
         const { data: testData, error: testError } = await supabase
-          .from('posts')
+          .from('posts_v2')
           .select('count')
           .limit(1);
 
@@ -32,8 +32,8 @@ export function DebugPanel({ data, loading, error }: DebugPanelProps) {
 
         // Obtener conteos de tablas
         const [postsResult, commentsResult] = await Promise.all([
-          supabase.from('posts').select('*', { count: 'exact', head: true }),
-          supabase.from('comments').select('*', { count: 'exact', head: true })
+          supabase.from('posts_v2').select('*', { count: 'exact', head: true }),
+          supabase.from('comments_v2').select('*', { count: 'exact', head: true })
         ]);
 
         setTableCounts({

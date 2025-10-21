@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
-type Post = Database['public']['Tables']['posts']['Row'];
-type Comment = Database['public']['Tables']['comments']['Row'];
+type Post = Database['public']['Tables']['posts_v2']['Row'];
+type Comment = Database['public']['Tables']['comments_v2']['Row'];
 
 export interface DashboardFilters {
   dateMode: 'annual' | 'monthly';
@@ -51,9 +51,8 @@ export function useDashboardDataSimple(filters: DashboardFilters) {
         // Obtener posts sin filtros de fecha para simplificar
         console.log('📥 Obteniendo posts...');
         const { data: posts, error: postsError } = await supabase
-          .from('posts')
-          .select('*')
-          .limit(100); // Limitar a 100 posts para la prueba
+          .from('posts_v2')
+          .select('*');
 
         if (postsError) {
           console.error('❌ Error obteniendo posts:', postsError);
@@ -68,9 +67,8 @@ export function useDashboardDataSimple(filters: DashboardFilters) {
         // Obtener comentarios sin filtros para simplificar
         console.log('📥 Obteniendo comentarios...');
         const { data: comments, error: commentsError } = await supabase
-          .from('comments')
-          .select('*')
-          .limit(100); // Limitar a 100 comentarios para la prueba
+          .from('comments_v2')
+          .select('*');
 
         if (commentsError) {
           console.error('❌ Error obteniendo comments:', commentsError);
