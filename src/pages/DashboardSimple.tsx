@@ -11,7 +11,7 @@ import { useScrollDirection } from "@/hooks/use-scroll-direction";
 const DashboardSimple = () => {
   const [filters, setFilters] = useState<DashboardFilters>({
     dateMode: 'annual',
-    year: new Date().getFullYear(),
+    year: 2025,
     month: new Date().getMonth() + 1,
     theme: "all",
     sentiment: "all",
